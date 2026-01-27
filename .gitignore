@@ -1,0 +1,34 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ===== Virtual environment =====
+.venv/
+venv/
+env/
+
+# ===== Pytest =====
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ===== Playwright =====
+playwright-report/
+test-results/
+
+# ===== IDEs =====
+.idea/
+.vscode/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Logs =====
+*.log
+
+# ===== Reports =====
+allure-results/
+allure-report/
