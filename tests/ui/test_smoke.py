@@ -4,12 +4,13 @@ Critical go / no-go user flows.
 If any test fails -> release is blocked.
 """
 
+import pytest
 from pages.login_page import LoginPage
 from pages.inventory_page import InventoryPage
 from pages.cart_page import CartPage
 from pages.checkout_page import CheckoutPage
 
-
+@pytest.mark.smoke
 def test_smoke_login_success(page):
     """
     AUTH
@@ -22,7 +23,7 @@ def test_smoke_login_success(page):
 
     assert "inventory" in page.url
 
-
+@pytest.mark.smoke
 def test_smoke_logout_blocks_access(page):
     """
     AUTH
@@ -39,7 +40,7 @@ def test_smoke_logout_blocks_access(page):
 
     assert "inventory" not in page.url
 
-
+@pytest.mark.smoke
 def test_smoke_inventory_visible(page):
     """
     INVENTORY
@@ -53,7 +54,7 @@ def test_smoke_inventory_visible(page):
 
     assert inventory_page.is_inventory_visible()
 
-
+@pytest.mark.smoke
 def test_smoke_add_item_to_cart(page):
     """
     INVENTORY
@@ -69,7 +70,7 @@ def test_smoke_add_item_to_cart(page):
 
     assert inventory_page.get_cart_badge_count() == 1
 
-
+@pytest.mark.smoke
 def test_smoke_item_present_in_cart(page):
     """
     CART
@@ -87,7 +88,7 @@ def test_smoke_item_present_in_cart(page):
 
     assert cart_page.get_items_count() == 1
 
-
+@pytest.mark.smoke
 def test_smoke_go_to_checkout(page):
     """
     CART
@@ -106,7 +107,7 @@ def test_smoke_go_to_checkout(page):
 
     assert "checkout-step-one" in page.url
 
-
+@pytest.mark.smoke
 def test_smoke_checkout_happy_path(page):
     """
     CHECKOUT
@@ -134,7 +135,7 @@ def test_smoke_checkout_happy_path(page):
 
     assert checkout_page.is_order_completed()
 
-
+@pytest.mark.smoke
 def test_smoke_cart_empty_after_checkout(page):
     """
     CHECKOUT
