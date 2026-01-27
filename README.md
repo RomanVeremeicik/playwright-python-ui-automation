@@ -25,12 +25,12 @@ The application under test: https://www.saucedemo.com/
 ##  Project Structure
 
 tests/ui/
-├─ test_login.py # Login feature tests
-├─ test_inventory.py # Inventory (catalog) tests
-├─ test_cart.py # Cart functionality tests
-├─ test_checkout.py # Checkout (happy + negative cases)
-├─ test_session.py # Session & stability tests
-└─ test_smoke.py # Go / No-Go smoke tests
+├─ test_login.py 
+├─ test_inventory.py 
+├─ test_cart.py 
+├─ test_checkout.py 
+├─ test_session.py 
+└─ test_smoke.py 
 
 pages/
 ├─ login_page.py
