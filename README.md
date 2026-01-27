@@ -4,7 +4,7 @@ This project demonstrates a production-like UI automation framework
 built with Playwright (Python) and pytest.
 
 The goal of the project is to showcase:
-- real-world QA thinking
+- Critical QA thinking
 - business-oriented test design
 - clean test architecture
 - go / no-go decision making using smoke tests
