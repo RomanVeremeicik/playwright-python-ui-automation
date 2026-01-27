@@ -115,7 +115,6 @@ If **any smoke test fails**, the release is considered **blocked**.
 
 ### Install dependencies
 
-# bash
 pip install -r requirements.txt
 playwright install
 
@@ -130,6 +129,5 @@ pytest tests/ui/test_smoke.py
 ## Test Reports (Allure)
 
 Generate report:
-# bash
 pytest --alluredir=allure-results
 allure serve allure-results
