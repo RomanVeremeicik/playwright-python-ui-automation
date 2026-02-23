@@ -1,22 +1,28 @@
+from playwright.sync_api import Page, expect
 from pages.base_page import BasePage
+from settings import BASE_URL
 
 
 class LoginPage(BasePage):
 
-    URL = "https://www.saucedemo.com/"
+    def __init__(self, page: Page):
+        super().__init__(page)
 
-    USERNAME_INPUT = "#user-name"
-    PASSWORD_INPUT = "#password"
-    LOGIN_BUTTON = "#login-button"
-    ERROR_MESSAGE = "[data-test='error']"
+        self.username_input = page.get_by_role("textbox", name="Username")
+        self.password_input = page.get_by_role("textbox", name="Password")
+        self.login_button = page.get_by_role("button", name="Login")
+        self.error_message = page.locator("[data-test='error']")
 
-    def open_login_page(self):
-        self.open(self.URL)
+    def open(self):
+        self.page.goto(BASE_URL)
 
     def login(self, username: str, password: str):
-        self.fill(self.USERNAME_INPUT, username)
-        self.fill(self.PASSWORD_INPUT, password)
-        self.click(self.LOGIN_BUTTON)
+        self.username_input.fill(username)
+        self.password_input.fill(password)
+        self.login_button.click()
 
-    def get_error_message(self) -> str:
-        return self.get_text(self.ERROR_MESSAGE)
+    def expect_error_visible(self):
+        expect(self.error_message).to_be_visible()
+
+    def get_error_text(self) -> str:
+        return self.error_message.text_content()
