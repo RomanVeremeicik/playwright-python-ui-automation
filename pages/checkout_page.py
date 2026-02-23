@@ -34,3 +34,6 @@ class CheckoutPage:
 
     def expect_checkout_complete(self):
         expect(self.page.locator(self.COMPLETE_HEADER)).to_be_visible()
+
+    def fill_checkout_form(self, first_name: str, last_name: str, postal_code: str):
+    self.fill_checkout_in formation(first_name, last_name, postal_code)
