@@ -1,168 +1,94 @@
-"""
-Smoke tests:
-Critical go / no-go user flows.
-If any test fails -> release is blocked.
-"""
-
 import pytest
 from pages.login_page import LoginPage
 from pages.inventory_page import InventoryPage
 from pages.cart_page import CartPage
 from pages.checkout_page import CheckoutPage
+from settings import STANDARD_USER, PASSWORD
+
 
 @pytest.mark.smoke
-def test_smoke_login_success(page):
-    """
-    AUTH
-    Risk: user cannot access system
-    """
-    login_page = LoginPage(page)
+def test_01_login_success(page):
+    login = LoginPage(page)
 
-    login_page.open_login_page()
-    login_page.login("standard_user", "secret_sauce")
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
 
     assert "inventory" in page.url
 
-@pytest.mark.smoke
-def test_smoke_logout_blocks_access(page):
-    """
-    AUTH
-    Risk: unauthorized access after logout
-    """
-    login_page = LoginPage(page)
-    inventory_page = InventoryPage(page)
-
-    login_page.open_login_page()
-    login_page.login("standard_user", "secret_sauce")
-    inventory_page.logout()
-
-    page.goto("https://www.saucedemo.com/inventory.html")
-
-    assert "inventory" not in page.url
 
 @pytest.mark.smoke
-def test_smoke_inventory_visible(page):
-    """
-    INVENTORY
-    Risk: product catalog not available
-    """
-    login_page = LoginPage(page)
-    inventory_page = InventoryPage(page)
+def test_02_inventory_page_visible(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
 
-    login_page.open_login_page()
-    login_page.login("standard_user", "secret_sauce")
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
 
-    assert inventory_page.is_inventory_visible()
+    inventory.expect_visible()
+
 
 @pytest.mark.smoke
-def test_smoke_add_item_to_cart(page):
-    """
-    INVENTORY
-    Risk: user cannot select product
-    """
-    login_page = LoginPage(page)
-    inventory_page = InventoryPage(page)
+def test_03_add_item_to_cart(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
+    cart = CartPage(page)
 
-    login_page.open_login_page()
-    login_page.login("standard_user", "secret_sauce")
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
 
-    inventory_page.add_first_item_to_cart()
+    inventory.add_first_item_to_cart()
+    inventory.go_to_cart()
 
-    assert inventory_page.get_cart_badge_count() == 1
+    assert cart.get_items_count() == 1
 
-@pytest.mark.smoke
-def test_smoke_item_present_in_cart(page):
-    """
-    CART
-    Risk: selected product is lost
-    """
-    login_page = LoginPage(page)
-    inventory_page = InventoryPage(page)
-    cart_page = CartPage(page)
-
-    login_page.open_login_page()
-    login_page.login("standard_user", "secret_sauce")
-
-    inventory_page.add_first_item_to_cart()
-    inventory_page.go_to_cart()
-
-    assert cart_page.get_items_count() == 1
 
 @pytest.mark.smoke
-def test_smoke_go_to_checkout(page):
-    """
-    CART
-    Risk: user cannot proceed to checkout
-    """
-    login_page = LoginPage(page)
-    inventory_page = InventoryPage(page)
-    cart_page = CartPage(page)
+def test_04_proceed_to_checkout(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
+    cart = CartPage(page)
 
-    login_page.open_login_page()
-    login_page.login("standard_user", "secret_sauce")
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
 
-    inventory_page.add_first_item_to_cart()
-    inventory_page.go_to_cart()
-    cart_page.go_to_checkout()
+    inventory.add_first_item_to_cart()
+    inventory.go_to_cart()
+    cart.go_to_checkout()
 
     assert "checkout-step-one" in page.url
 
-@pytest.mark.smoke
-def test_smoke_checkout_happy_path(page):
-    """
-    CHECKOUT
-    Risk: user cannot complete purchase
-    """
-    login_page = LoginPage(page)
-    inventory_page = InventoryPage(page)
-    cart_page = CartPage(page)
-    checkout_page = CheckoutPage(page)
-
-    login_page.open_login_page()
-    login_page.login("standard_user", "secret_sauce")
-
-    inventory_page.add_first_item_to_cart()
-    inventory_page.go_to_cart()
-    cart_page.go_to_checkout()
-
-    checkout_page.fill_checkout_form(
-        first_name="John",
-        last_name="Doe",
-        postal_code="12345"
-    )
-    checkout_page.continue_checkout()
-    checkout_page.finish_checkout()
-
-    assert checkout_page.is_order_completed()
 
 @pytest.mark.smoke
-def test_smoke_cart_empty_after_checkout(page):
-    """
-    CHECKOUT
-    Risk: cart state is inconsistent after order completion
-    """
-    login_page = LoginPage(page)
-    inventory_page = InventoryPage(page)
-    cart_page = CartPage(page)
-    checkout_page = CheckoutPage(page)
+def test_05_complete_checkout(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
+    cart = CartPage(page)
+    checkout = CheckoutPage(page)
 
-    login_page.open_login_page()
-    login_page.login("standard_user", "secret_sauce")
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
 
-    inventory_page.add_first_item_to_cart()
-    inventory_page.go_to_cart()
-    cart_page.go_to_checkout()
+    inventory.add_first_item_to_cart()
+    inventory.go_to_cart()
+    cart.go_to_checkout()
 
-    checkout_page.fill_checkout_form(
-        first_name="Jane",
-        last_name="Doe",
-        postal_code="54321"
-    )
-    checkout_page.continue_checkout()
-    checkout_page.finish_checkout()
+    checkout.fill_checkout_form("John", "Doe", "12345")
+    checkout.continue_checkout()
+    checkout.finish_checkout()
 
-    inventory_page.go_to_cart()
+    assert checkout.is_order_completed()
 
-    assert cart_page.get_items_count() == 0
 
+@pytest.mark.smoke
+def test_06_logout_blocks_inventory_access(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
+
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
+
+    inventory.logout()
+
+    page.goto(f"{login.base_url}/inventory.html")
+    assert "inventory" not in page.url
 
