@@ -104,15 +104,14 @@ def pytest_runtest_makereport(item, call):
 
             context.tracing.stop(path=str(trace_path))
 
-            # attach trace as binary (safe for all allure versions)
+            # attach trace WITHOUT attachment_type
             with open(trace_path, "rb") as f:
                 allure.attach(
                     f.read(),
-                    name="trace.zip",
-                    attachment_type=allure.attachment_type.BINARY
+                    name="trace.zip"
                 )
 
-            # attach screenshot
+            # screenshot attachment
             screenshot = page.screenshot()
             allure.attach(
                 screenshot,
