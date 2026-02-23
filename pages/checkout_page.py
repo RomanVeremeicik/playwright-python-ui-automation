@@ -1,27 +1,36 @@
 from playwright.sync_api import Page, expect
-from pages.base_page import BasePage
 
 
-class CheckoutPage(BasePage):
+class CheckoutPage:
+
+    FIRST_NAME = "#first-name"
+    LAST_NAME = "#last-name"
+    POSTAL_CODE = "#postal-code"
+    CONTINUE_BUTTON = "#continue"
+    FINISH_BUTTON = "#finish"
+    CANCEL_BUTTON = "#cancel"
+    ERROR_MESSAGE = "[data-test='error']"
+    COMPLETE_HEADER = ".complete-header"
 
     def __init__(self, page: Page):
-        super().__init__(page)
+        self.page = page
 
-        self.first_name = page.locator("#first-name")
-        self.last_name = page.locator("#last-name")
-        self.postal_code = page.locator("#postal-code")
-        self.continue_button = page.locator("#continue")
-        self.finish_button = page.locator("#finish")
-        self.success_message = page.locator(".complete-header")
+    def fill_checkout_information(self, first: str, last: str, zip_code: str):
+        self.page.fill(self.FIRST_NAME, first)
+        self.page.fill(self.LAST_NAME, last)
+        self.page.fill(self.POSTAL_CODE, zip_code)
 
-    def fill_information(self, first: str, last: str, postal: str):
-        self.first_name.fill(first)
-        self.last_name.fill(last)
-        self.postal_code.fill(postal)
-        self.continue_button.click()
+    def continue_checkout(self):
+        self.page.click(self.CONTINUE_BUTTON)
 
-    def finish(self):
-        self.finish_button.click()
+    def finish_checkout(self):
+        self.page.click(self.FINISH_BUTTON)
 
-    def expect_success(self):
-        expect(self.success_message).to_have_text("Thank you for your order!")
+    def cancel_checkout(self):
+        self.page.click(self.CANCEL_BUTTON)
+
+    def get_error_message(self):
+        return self.page.locator(self.ERROR_MESSAGE).text_content()
+
+    def expect_checkout_complete(self):
+        expect(self.page.locator(self.COMPLETE_HEADER)).to_be_visible()
