@@ -1,13 +1,25 @@
+from playwright.sync_api import Page, expect
 from pages.base_page import BasePage
 
 
 class InventoryPage(BasePage):
 
-    INVENTORY_LIST = ".inventory_list"
-    TITLE = ".title"
+    def __init__(self, page: Page):
+        super().__init__(page)
 
-    def is_inventory_loaded(self):
-        self.expect_visible(self.INVENTORY_LIST)
+        self.inventory_list = page.locator(".inventory_list")
+        self.add_to_cart_buttons = page.locator("button[data-test^='add-to-cart']")
+        self.cart_link = page.locator(".shopping_cart_link")
+        self.title = page.locator(".title")
 
-    def get_title(self):
-        return self.get_text(self.TITLE)
+    def expect_loaded(self):
+        expect(self.inventory_list).to_be_visible()
+
+    def add_first_item_to_cart(self):
+        self.add_to_cart_buttons.first.click()
+
+    def open_cart(self):
+        self.cart_link.click()
+
+    def expect_title(self, expected: str):
+        expect(self.title).to_have_text(expected)
