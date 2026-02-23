@@ -14,14 +14,12 @@ class CheckoutPage:
     def __init__(self, page: Page):
         self.page = page
 
-    # Основной метод
     def fill_checkout_information(self, first_name: str, last_name: str, postal_code: str):
         self.page.fill(self.FIRST_NAME_INPUT, first_name)
         self.page.fill(self.LAST_NAME_INPUT, last_name)
         self.page.fill(self.POSTAL_CODE_INPUT, postal_code)
         self.page.click(self.CONTINUE_BUTTON)
 
-    # Wrapper для тестов
     def fill_checkout_form(self, first_name: str, last_name: str, postal_code: str):
         self.fill_checkout_information(first_name, last_name, postal_code)
 
