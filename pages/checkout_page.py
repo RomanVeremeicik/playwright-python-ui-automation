@@ -1,5 +1,4 @@
-from playwright.sync_api import Page, expect
-
+from playwright.sync_api import Page
 
 class CheckoutPage:
 
@@ -15,6 +14,7 @@ class CheckoutPage:
     def __init__(self, page: Page):
         self.page = page
 
+    # ---------- Step 1 ----------
     def fill_checkout_form(self, first_name: str, last_name: str, postal_code: str):
         self.page.fill(self.FIRST_NAME_INPUT, first_name)
         self.page.fill(self.LAST_NAME_INPUT, last_name)
@@ -23,14 +23,16 @@ class CheckoutPage:
     def continue_checkout(self):
         self.page.click(self.CONTINUE_BUTTON)
 
+    # ---------- Step 2 ----------
     def finish_checkout(self):
         self.page.click(self.FINISH_BUTTON)
 
     def cancel_checkout(self):
         self.page.click(self.CANCEL_BUTTON)
 
-    def expect_success_message(self):
-        expect(self.page.locator(self.SUCCESS_MESSAGE)).to_be_visible()
+    # ---------- State checks ----------
+    def is_error_displayed(self) -> bool:
+        return self.page.locator(self.ERROR_MESSAGE).is_visible()
 
-    def expect_error_visible(self):
-        expect(self.page.locator(self.ERROR_MESSAGE)).to_be_visible()
+    def is_order_completed(self) -> bool:
+        return self.page.locator(self.SUCCESS_MESSAGE).is_visible()
