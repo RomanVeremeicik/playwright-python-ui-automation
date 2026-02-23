@@ -1,70 +1,70 @@
+import pytest
 from pages.login_page import LoginPage
 from pages.inventory_page import InventoryPage
+from settings import STANDARD_USER, PASSWORD
 
+#Test Case 1
+@pytest.mark.smoke
+def test_01_login_success(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
 
-# === GATE 1: AUTHENTICATION ===
-# Test_Case 1
-def test_p0_login_success(page):
-    """Risk: user cannot login"""
-    login_page = LoginPage(page)
-
-    login_page.open_login_page()
-    login_page.login("standard_user", "secret_sauce")
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
 
     assert "inventory" in page.url
 
-# Test_Case 2
-def test_p0_login_invalid_password(page):
-    """Risk: unauthorized access"""
-    login_page = LoginPage(page)
+#Test Case 2
+@pytest.mark.regression
+def test_02_login_invalid_password(page):
+    login = LoginPage(page)
 
-    login_page.open_login_page()
-    login_page.login("standard_user", "wrong_password")
+    login.open_login_page()
+    login.login(STANDARD_USER, "wrong_password")
 
-    assert login_page.is_error_displayed()
+    login.expect_error_visible()
     assert "inventory" not in page.url
 
-# Test_Case 3
-def test_p0_login_locked_user(page):
-    """Risk: blocked users can access system"""
-    login_page = LoginPage(page)
+#Test Case 3
+@pytest.mark.regression
+def test_03_login_locked_user(page):
+    login = LoginPage(page)
 
-    login_page.open_login_page()
-    login_page.login("locked_out_user", "secret_sauce")
+    login.open_login_page()
+    login.login("locked_out_user", PASSWORD)
 
-    assert login_page.is_error_displayed()
+    login.expect_error_visible()
     assert "inventory" not in page.url
 
-# Test_Case 4
-def test_p0_login_empty_credentials(page):
-    """Risk: invalid input not handled"""
-    login_page = LoginPage(page)
+#Test Case 4
+@pytest.mark.regression
+def test_04_login_empty_credentials(page):
+    login = LoginPage(page)
 
-    login_page.open_login_page()
-    login_page.login("", "")
+    login.open_login_page()
+    login.login("", "")
 
-    assert login_page.is_error_displayed()
+    login.expect_error_visible()
 
-# Test_Case 5
-def test_p0_direct_inventory_access_without_login(page):
-    """Risk: unauthorized access via direct URL"""
-    page.goto("https://www.saucedemo.com/inventory.html")
+#Test Case 5
+@pytest.mark.regression
+def test_05_direct_inventory_access_without_login(page):
+    login = LoginPage(page)
 
+    page.goto(f"{login.base_url}/inventory.html")
     assert "inventory" not in page.url
 
-# Test_Case 6
-def test_p0_access_denied_after_logout(page):
-    """Risk: session not cleared after logout"""
-    login_page = LoginPage(page)
-    inventory_page = InventoryPage(page)
+#Test Case 6
+@pytest.mark.regression
+def test_06_access_denied_after_logout(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
 
-    login_page.open_login_page()
-    login_page.login("standard_user", "secret_sauce")
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
+    inventory.logout()
 
-    inventory_page.logout()
-
-    page.goto("https://www.saucedemo.com/inventory.html")
-
+    page.goto(f"{login.base_url}/inventory.html")
     assert "inventory" not in page.url
 
 
