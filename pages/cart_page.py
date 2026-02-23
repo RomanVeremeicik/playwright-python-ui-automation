@@ -7,6 +7,7 @@ class CartPage:
     CONTINUE_SHOPPING_BUTTON = "#continue-shopping"
     CHECKOUT_BUTTON = "#checkout"
     ITEM_NAME = ".inventory_item_name"
+    ITEM_PRICE = ".inventory_item_price"
 
     def __init__(self, page: Page):
         self.page = page
@@ -33,3 +34,7 @@ class CartPage:
 
     def expect_cart_empty(self):
         expect(self.page.locator(self.CART_ITEM)).to_have_count(0)
+
+    def get_first_item_price(self) -> str:
+        return self.page.locator(self.ITEM_PRICE).first.text_content()
+         
