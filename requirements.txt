@@ -1,4 +1,18 @@
-pytest
-playwright
-pytest-playwright
-allure-pytest
+# Core
+pytest==8.2.0
+playwright==1.43.0
+
+# Parallel execution
+pytest-xdist==3.5.0
+
+# Retry strategy
+pytest-rerunfailures==14.0
+
+# Reporting
+allure-pytest==2.13.5
+
+# Environment config
+python-dotenv==1.0.1
+
+# Optional (if API layer exists)
+requests==2.31.0
