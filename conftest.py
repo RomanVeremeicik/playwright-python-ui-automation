@@ -66,7 +66,7 @@ def auth_storage(browser):
     page = context.new_page()
 
     login_page = LoginPage(page)
-    login_page.open_login_page()
+    login_page.open()
     login_page.login(STANDARD_USER, PASSWORD)
 
     storage_path = "state/auth.json"
