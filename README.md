@@ -1,4 +1,3 @@
----
 ## UI Automation Framework — SauceDemo
 
 - UI Automation Framework — SauceDemo
