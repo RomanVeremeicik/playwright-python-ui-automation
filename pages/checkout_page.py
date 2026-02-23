@@ -1,27 +1,29 @@
 from playwright.sync_api import Page, expect
 
-
 class CheckoutPage:
 
-    FIRST_NAME = "#first-name"
-    LAST_NAME = "#last-name"
-    POSTAL_CODE = "#postal-code"
+    FIRST_NAME_INPUT = "#first-name"
+    LAST_NAME_INPUT = "#last-name"
+    POSTAL_CODE_INPUT = "#postal-code"
     CONTINUE_BUTTON = "#continue"
     FINISH_BUTTON = "#finish"
     CANCEL_BUTTON = "#cancel"
+    SUCCESS_MESSAGE = ".complete-header"
     ERROR_MESSAGE = "[data-test='error']"
-    COMPLETE_HEADER = ".complete-header"
 
     def __init__(self, page: Page):
         self.page = page
 
-    def fill_checkout_information(self, first: str, last: str, zip_code: str):
-        self.page.fill(self.FIRST_NAME, first)
-        self.page.fill(self.LAST_NAME, last)
-        self.page.fill(self.POSTAL_CODE, zip_code)
-
-    def continue_checkout(self):
+    # Основной метод
+    def fill_checkout_information(self, first_name: str, last_name: str, postal_code: str):
+        self.page.fill(self.FIRST_NAME_INPUT, first_name)
+        self.page.fill(self.LAST_NAME_INPUT, last_name)
+        self.page.fill(self.POSTAL_CODE_INPUT, postal_code)
         self.page.click(self.CONTINUE_BUTTON)
+
+    # Wrapper для тестов
+    def fill_checkout_form(self, first_name: str, last_name: str, postal_code: str):
+        self.fill_checkout_information(first_name, last_name, postal_code)
 
     def finish_checkout(self):
         self.page.click(self.FINISH_BUTTON)
@@ -29,11 +31,8 @@ class CheckoutPage:
     def cancel_checkout(self):
         self.page.click(self.CANCEL_BUTTON)
 
-    def get_error_message(self):
-        return self.page.locator(self.ERROR_MESSAGE).text_content()
+    def expect_success_message(self):
+        expect(self.page.locator(self.SUCCESS_MESSAGE)).to_be_visible()
 
-    def expect_checkout_complete(self):
-        expect(self.page.locator(self.COMPLETE_HEADER)).to_be_visible()
-
-    def fill_checkout_form(self, first_name: str, last_name: str, postal_code: str):
-    self.fill_checkout_in formation(first_name, last_name, postal_code)
+    def expect_error_visible(self):
+        expect(self.page.locator(self.ERROR_MESSAGE)).to_be_visible()
