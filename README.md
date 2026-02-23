@@ -1,81 +1,122 @@
-# UI Automation Project — SauceDemo
+---
+## UI Automation Framework — SauceDemo
 
-This project demonstrates a production-like UI automation framework
-built with Playwright (Python) and pytest.
-
-The goal of the project is to showcase:
-- Critical QA thinking
-- business-oriented test design
-- clean test architecture
-- go / no-go decision making using smoke tests
-
-The application under test: https://www.saucedemo.com/
+- UI Automation Framework — SauceDemo
+- Production-style UI automation framework built with Playwright (Python) and pytest.
+- The project demonstrates engineering-level test design, business-oriented validation, and release decision strategy.
+- Application under test:
+https://www.saucedemo.com/
 
 ---
 
- Tech Stack
+## Project Goals
+
+- This project showcases:
+- Risk-based test design
+- Business-oriented automation
+- Clean and scalable test architecture
+- Smoke-driven release control (Go / No-Go strategy)
+- Stable UI automation with minimal flakiness
+- CI-ready test execution
+- Multi-browser support
+
+---
+
+## Tech Stack
 
 - Python 3.14
 - Playwright
 - pytest
 - Page Object Model (POM)
+- Allure reporting
+- GitHub Actions (CI)
+- Multi-browser execution
+- Retry strategy for flaky tests
 
 ---
 
-##  Project Structure
+## Architecture Overview
 
-tests/ui/
-├─ test_login.py 
-├─ test_inventory.py 
-├─ test_cart.py 
-├─ test_checkout.py 
-├─ test_session.py 
-└─ test_smoke.py 
+- The framework follows these principles:
+- Page Objects encapsulate UI details
+- Tests represent business flows, not UI mechanics
+- Assertions are minimal and meaningful
+- Test data is separated from test logic
+- Smoke tests represent release-critical paths
+- Login is executed once per session via storage state
+- Each test runs in isolated browser context
+
+---
+
+## Project Structure
+
+tests/
+ └─ ui/
+     ├─ test_login.py
+     ├─ test_inventory.py
+     ├─ test_cart.py
+     ├─ test_checkout.py
+     ├─ test_session.py
+     └─ test_smoke.py
 
 pages/
-├─ login_page.py
-├─ inventory_page.py
-├─ cart_page.py
-└─ checkout_page.py
+ ├─ login_page.py
+ ├─ inventory_page.py
+ ├─ cart_page.py
+ └─ checkout_page.py
 
-##  Testing Approach
+data/
+ ├─ users.py
+ └─ checkout_data.py
 
-This project follows several key principles:
+.github/workflows/
+conftest.py
+pytest.ini
 
-- **Tests are grouped by feature**, not by test type (positive/negative)
-- **Each test covers a business risk**, not a UI detail
-- **UI assertions are minimal** to avoid flaky tests
-- **Page Objects encapsulate UI details**
-- Smoke tests represent **release-critical flows**
+## Testing Strategy
+
+Feature-based grouping:
+- Tests are organized by business feature, not by test type (positive/negative).
+Risk-based coverage:
+- Each test validates a business risk:
+   - Authentication failures
+   - Cart consistency
+   - Order processing correctness
+   - Session security
+   - Access control protection
+   
+Minimal UI Assertions:
+- The goal is to avoid fragile UI checks.
+- Tests verify system behavior, not layout.
 
 ---
 
 ## Test Coverage Overview
 
-###  Authentication
+Authentication: 
 - Successful login
 - Access denied after logout
 - Direct URL access protection
 
-###  Inventory
+Inventory:
 - Inventory visibility after login
 - Add / remove items
 - Cart badge state
 - Navigation to cart
 
-###  Cart
+Cart:
 - Selected items are displayed
 - Remove items from cart
 - Navigation back to inventory
 - Navigation to checkout
 
-### Checkout
+Checkout:
 - Happy path checkout (end-to-end)
 - Required fields validation (negative cases)
 - Cancel checkout flow
 - Checkout with multiple items
 
-### Session & Stability
+Session & Stability:
 - Cart persistence after page refresh
 - Session stability on browser back navigation
 - Access restriction after logout
@@ -85,49 +126,84 @@ This project follows several key principles:
 
 ## Smoke Tests (Go / No-Go)
 
-Smoke tests represent the **minimal critical set**
-that must pass to allow a release.
+Smoke tests represent the minimum critical set required for release approval.
 
-### Smoke checklist
+Smoke Checklist:
 
-#### Authentication
-- [x] User can successfully log in
-- [x] Access is denied after logout
+Authentication:
 
-#### Inventory
-- [x] Product catalog is visible after login
-- [x] User can add product to cart
+- User can log in successfully
+- Access is denied after logout
 
-#### Cart
-- [x] Selected product is displayed in cart
-- [x] User can proceed from cart to checkout
+Inventory:
 
-#### Checkout
-- [x] User can complete checkout (happy path)
-- [x] Cart is empty after successful order
+- Product catalog is visible
+- User can add product to cart
 
- **Release rule:**  
+Cart:
+
+- Selected product is displayed
+- User can proceed to checkout
+
+Checkout:
+
+- User can complete checkout
+- Cart is empty after successful order
+
+## Release rule
 If **any smoke test fails**, the release is considered **blocked**.
 
 ---
 
-##  How to Run Tests
+## How to Run
 
-### Install dependencies
+Install dependencies:
 
-pip install -r requirements.txt
-playwright install
+- pip install -r requirements.txt
+- playwright install
 
-# Run all tests
+Run all tests:
 
-pytest
+- pytest
+- 
+Run smoke tests only:
 
-# Run smoke tests only
+- pytest -m smoke
+  
+Run tests in specific browser:
 
-pytest tests/ui/test_smoke.py
-
+- pytest --browser_name=firefox
+  
 ## Test Reports (Allure)
 
 Generate report:
-pytest --alluredir=allure-results
-allure serve allure-results
+
+- pytest --alluredir=allure-results
+- allure serve allure-results
+
+Reports include:
+
+- Screenshots on failure
+- Playwright trace files
+- Test execution details
+
+## Engineering Decisions
+
+- Storage state is used to avoid repeated login and reduce test runtime.
+- Each test runs in isolated browser context.
+- Retry strategy is applied to reduce flaky test impact.
+- Multi-browser execution increases coverage confidence.
+- Smoke tests act as release quality gate.
+
+## What This Project Demonstrates
+
+- Understanding of UI automation architecture
+- Business-focused QA thinking
+- Test stability engineering
+- CI-ready framework design
+- Release decision modeling
+
+##  Final Status
+
+- This is not a demo script collection.
+- This is a structured automation framework built with scalability and release control in mind.
