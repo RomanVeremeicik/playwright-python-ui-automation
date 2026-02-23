@@ -1,73 +1,67 @@
-from pages.login_page import LoginPage
+import pytest
 from pages.inventory_page import InventoryPage
+from pages.login_page import LoginPage
+from settings import STANDARD_USER, PASSWORD
 
+#Test Case 1
+@pytest.mark.regression
+def test_01_inventory_visible_after_login(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
 
-def login_as_standard_user(page):
-    login_page = LoginPage(page)
-    login_page.open_login_page()
-    login_page.login("standard_user", "secret_sauce")
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
 
-#Test case 1
-def test_inventory_is_visible_after_login(page):
-    """ INVENTORY
-    Risk: user cannot see product catalog
-    """
-    login_as_standard_user(page)
-    inventory_page = InventoryPage(page)
+    inventory.expect_visible()
 
-    assert inventory_page.is_inventory_visible()
+#Test Case 2
+@pytest.mark.regression
+def test_02_add_item_to_cart(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
 
-#Test case 2
-def test_add_item_to_cart(page):
-    """
-    INVENTORY
-    Risk: user cannot select product
-    """
-    login_as_standard_user(page)
-    inventory_page = InventoryPage(page)
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
 
-    inventory_page.add_first_item_to_cart()
+    inventory.add_first_item_to_cart()
+    assert inventory.get_cart_badge_count() == 1
 
-    assert inventory_page.get_cart_badge_count() == 1
+#Test Case 3
+@pytest.mark.regression
+def test_03_remove_item_from_cart(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
 
-#Test case 3
-def test_remove_item_from_cart(page):
-    """
-    INVENTORY
-    Risk: user cannot change selected product
-    """
-    login_as_standard_user(page)
-    inventory_page = InventoryPage(page)
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
 
-    inventory_page.add_first_item_to_cart()
-    inventory_page.remove_first_item_from_cart()
+    inventory.add_first_item_to_cart()
+    inventory.remove_first_item_from_cart()
+    assert inventory.get_cart_badge_count() == 0
 
-    assert inventory_page.get_cart_badge_count() == 0
+#Test Case 4
+@pytest.mark.regression
+def test_04_user_can_go_to_cart(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
 
-#Test case 4
-def test_user_can_go_to_cart(page):
-    """
-    INVENTORY
-    Risk: user cannot proceed to next step
-    """
-    login_as_standard_user(page)
-    inventory_page = InventoryPage(page)
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
 
-    inventory_page.add_first_item_to_cart()
-    inventory_page.go_to_cart()
-
+    inventory.add_first_item_to_cart()
+    inventory.go_to_cart()
     assert "cart" in page.url
 
-def test_user_can_add_multiple_items_to_cart(page):
-    """
-    INVENTORY
-    Nice-to-have: multiple items selection
-    """
-    login_as_standard_user(page)
-    inventory_page = InventoryPage(page)
+#Test Case 5
+@pytest.mark.regression
+def test_05_user_can_add_multiple_items(page):
+    login = LoginPage(page)
+    inventory = InventoryPage(page)
 
-    inventory_page.add_items_to_cart(2)
+    login.open_login_page()
+    login.login(STANDARD_USER, PASSWORD)
 
-    assert inventory_page.get_cart_badge_count() == 2
+    inventory.add_items_to_cart(2)
+    assert inventory.get_cart_badge_count() == 2
 
 
