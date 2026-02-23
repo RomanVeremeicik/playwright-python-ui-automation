@@ -8,29 +8,29 @@ https://www.saucedemo.com/
 
 ---
 
-## Project Goals
+## What This Project Demonstrates
 
-- This project showcases:
 - Risk-based test design
 - Business-oriented automation
-- Clean and scalable test architecture
-- Smoke-driven release control (Go / No-Go strategy)
-- Stable UI automation with minimal flakiness
-- CI-ready test execution
-- Multi-browser support
+- Clean Page Object Model (POM)
+- Smoke-driven Go / No-Go release strategy
+- Stable multi-browser execution
+- CI-ready pipeline
+- Allure reporting with artifacts
+- Retry strategy for flaky tests
 
 ---
 
 ## Tech Stack
 
-- Python 3.14
+- Python 3.12+
 - Playwright
 - pytest
-- Page Object Model (POM)
+- pytest-xdist (parallel execution)
+- pytest-rerunfailures
 - Allure reporting
-- GitHub Actions (CI)
-- Multi-browser execution
-- Retry strategy for flaky tests
+- GitHub Actions CI
+- Docker-ready
 
 ---
 
