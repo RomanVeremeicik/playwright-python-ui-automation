@@ -1,43 +1,15 @@
 import os
-import shutil
 import pytest
 import allure
-from datetime import datetime
+from pathlib import Path
 from playwright.sync_api import sync_playwright
-from settings import STANDARD_USER, PASSWORD, HEADLESS
 from pages.login_page import LoginPage
+from settings import STANDARD_USER, PASSWORD, HEADLESS
 
 
-# ---------------------------
-# Clean old artifacts
-# ---------------------------
-
-ARTIFACT_DIRS = ["screenshots", "videos", "traces", "state"]
-
-def clean_artifacts():
-    for folder in ARTIFACT_DIRS:
-        if os.path.exists(folder):
-            shutil.rmtree(folder)
-        os.makedirs(folder)
-
-
-@pytest.fixture(scope="session", autouse=True)
-def cleanup_before_run():
-    clean_artifacts()
-
-
-# ---------------------------
-# Playwright / Browser setup
-# ---------------------------
-
-def pytest_addoption(parser):
-    parser.addoption(
-        "--browser_name",
-        action="store",
-        default="chromium",
-        help="Browser to run tests: chromium, firefox, webkit"
-    )
-
+# =========================
+# PLAYWRIGHT SESSION SETUP
+# =========================
 
 @pytest.fixture(scope="session")
 def playwright_instance():
@@ -46,22 +18,40 @@ def playwright_instance():
 
 
 @pytest.fixture(scope="session")
-def browser(playwright_instance, request):
-    browser_name = request.config.getoption("--browser_name")
-
-    browser_type = getattr(playwright_instance, browser_name)
-
-    browser = browser_type.launch(headless=HEADLESS)
+def browser(playwright_instance):
+    browser = playwright_instance.chromium.launch(headless=HEADLESS)
     yield browser
     browser.close()
 
 
-# ---------------------------
-# Storage state (login once)
-# ---------------------------
+# =========================
+# BASIC PAGE FIXTURE
+# =========================
+
+@pytest.fixture()
+def page(browser):
+    context = browser.new_context()
+    page = context.new_page()
+
+    # start tracing for every test
+    context.tracing.start(
+        screenshots=True,
+        snapshots=True,
+        sources=True
+    )
+
+    yield page
+
+    context.close()
+
+
+# =========================
+# AUTH STORAGE (SESSION LOGIN)
+# =========================
 
 @pytest.fixture(scope="session")
-def auth_storage(browser):
+def auth_storage(playwright_instance):
+    browser = playwright_instance.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
 
@@ -69,77 +59,63 @@ def auth_storage(browser):
     login_page.open()
     login_page.login(STANDARD_USER, PASSWORD)
 
-    storage_path = "state/auth.json"
+    storage_path = "storage_state.json"
     context.storage_state(path=storage_path)
-    context.close()
 
+    browser.close()
     return storage_path
 
 
-# ---------------------------
-# Context per test
-# ---------------------------
+@pytest.fixture()
+def authorized_page(browser, auth_storage):
+    context = browser.new_context(storage_state=auth_storage)
+    page = context.new_page()
 
-@pytest.fixture
-def context(browser, auth_storage, request):
-    test_name = request.node.name
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-    video_dir = os.path.join("videos", test_name)
-    os.makedirs(video_dir, exist_ok=True)
-
-    context = browser.new_context(
-        storage_state=auth_storage,
-        record_video_dir=video_dir
+    context.tracing.start(
+        screenshots=True,
+        snapshots=True,
+        sources=True
     )
 
-    trace_path = os.path.join("traces", f"{test_name}_{timestamp}.zip")
+    yield page
 
-    context.tracing.start(screenshots=True, snapshots=True, sources=True)
-
-    yield context
-
-    context.tracing.stop(path=trace_path)
     context.close()
 
 
-@pytest.fixture
-def page(context):
-    page = context.new_page()
-    yield page
-    page.close()
-
-
-# ---------------------------
-# Screenshot + Allure attachment on failure
-# ---------------------------
+# =========================
+# ALLURE FAILURE ATTACHMENTS
+# =========================
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield
-    result = outcome.get_result()
+    rep = outcome.get_result()
 
-    if result.when == "call":
-        page = item.funcargs.get("page")
+    if rep.when == "call" and rep.failed:
+        page = item.funcargs.get("page") or item.funcargs.get("authorized_page")
 
-        if page and result.failed:
-            screenshot_path = f"screenshots/{item.name}.png"
-            page.screenshot(path=screenshot_path)
+        if page:
+            context = page.context
 
-            allure.attach.file(
-                screenshot_path,
-                name="Screenshot",
+            trace_dir = Path("traces")
+            trace_dir.mkdir(exist_ok=True)
+
+            trace_path = trace_dir / f"{item.name}.zip"
+
+            context.tracing.stop(path=str(trace_path))
+
+            # attach trace as binary (safe for all allure versions)
+            with open(trace_path, "rb") as f:
+                allure.attach(
+                    f.read(),
+                    name="trace.zip",
+                    attachment_type=allure.attachment_type.BINARY
+                )
+
+            # attach screenshot
+            screenshot = page.screenshot()
+            allure.attach(
+                screenshot,
+                name="screenshot.png",
                 attachment_type=allure.attachment_type.PNG
             )
-
-            trace_file = next(
-                (f for f in os.listdir("traces") if item.name in f),
-                None
-            )
-
-            if trace_file:
-                allure.attach.file(
-                    f"traces/{trace_file}",
-                    name="Trace",
-                    attachment_type=allure.attachment_type.ZIP
-                )
